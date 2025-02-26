@@ -19,12 +19,9 @@ Template agent for [Pipecat Cloud](https://www.daily.co/products/pipecat-cloud/)
 git clone https://github.com/pipecat-ai/pipecat-cloud-starter
 ```
 
+# tbd on this step
 ```bash
-cp example.pcc-deploy.toml .pcc-deploy.toml
-# update your secrets and names ? "${MY_AGENT_NAME}" and such...
-# DAILY_API_KEY = ""
-# ELEVENLABS_API_KEY = ""
-# OPENAI_API_KEY = "
+cp example.pcc-deploy.toml pcc-deploy.toml
 ```
 
 3. setup python and dependencies
@@ -40,17 +37,19 @@ pipecat auth login
 ```
 
 4. setup secrets
-
 ```bash
-cp example.pcc-deploy.toml .pcc-deploy.toml
+cp example.pcc-deploy.toml pcc-deploy.toml
 
 # set secrets
 pipecat secrets set my-first-agent-secret-set \
 DAILY_API_KEY="${DAILY_API_KEY}" \
 ELEVENLABS_API_KEY="${ELEVENLABS_API_KEY}" \
 OPENAI_API_KEY="${OPENAI_API_KEY}"
+```
 
-# check secrets
+- check secrets
+> sshhhh. secret values will not be listed
+```bash
 pipecat secrets list my-first-agent-secret-set
 ```
 
