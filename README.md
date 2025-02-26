@@ -54,10 +54,14 @@ OPENAI_API_KEY="${OPENAI_API_KEY}"
 pipecat secrets list my-first-agent-secret-set
 ```
 
-# try out the agent locally first
-# not sure what goes here yet. wip.
-
-
+5. run locally
+# check that things are working as expected
+```bash
+export DAILY_API_KEY="${DAILY_API_KEY}"
+export ELEVENLABS_API_KEY="${ELEVENLABS_API_KEY}"
+export OPENAI_API_KEY="${OPENAI_API_KEY}"
+LOCAL_RUN=1 python bot.py 
+```
 
 
 5. export your variables for convenience
@@ -68,7 +72,6 @@ export MY_AGENT_NAME="my-first-agent"
 
 5. push to docker
 > ensure Docker is running.
-
 ```bash
 docker build --platform linux/arm64 -t "${MY_AGENT_NAME}" .
 docker tag "${MY_AGENT_NAME}":latest "${MY_DOCKER_REPOSITORY}"/"${MY_AGENT_NAME}":0.1

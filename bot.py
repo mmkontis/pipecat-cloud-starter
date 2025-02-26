@@ -19,7 +19,6 @@ load_dotenv(override=True)
 logger.remove(0)
 logger.add(sys.stderr, level="DEBUG")
 
-
 async def main(room_url: str, token: str):
     async with aiohttp.ClientSession() as session:
         transport = DailyTransport(
@@ -36,7 +35,7 @@ async def main(room_url: str, token: str):
 
         tts = ElevenLabsTTSService(
             api_key=os.getenv("ELEVENLABS_API_KEY", ""),
-            voice_id="UgBBYS2sOqTuMpoF3BR0",
+            voice_id="cgSgspJ2msm6clMCkdW9"
         )
 
         llm = OpenAILLMService(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
@@ -83,9 +82,29 @@ async def main(room_url: str, token: str):
 
         await runner.run(task)
 
-
 async def bot(config, room_url: str, token: str):
     logger.info(f"Bot process initialized {room_url} {token}")
     logger.info(f"Bot config {config}")
     await main(room_url, token)
     logger.info("Bot process completed")
+
+###########################
+# for local test run only #
+###########################
+LOCAL_RUN = os.getenv("LOCAL_RUN")
+if LOCAL_RUN:
+    import asyncio
+    from local_runner import configure
+
+async def local_main():
+    async with aiohttp.ClientSession() as session:
+        (room_url, token) = await configure(session)
+        logger.warning(f"_")
+        logger.warning(f"_")
+        logger.warning(f"Talk to your agent here: {room_url}")
+        logger.warning(f"_")
+        logger.warning(f"_")
+        await main(room_url, token)    
+
+if LOCAL_RUN and __name__ == "__main__":
+    asyncio.run(local_main())
