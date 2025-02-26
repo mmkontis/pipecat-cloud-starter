@@ -1,9 +1,7 @@
-name = "${MY_AGENT_NAME}"
-image = "${MY_DOCKER_REPOSITORY}/${MY_AGENT_NAME}:0.1"
+agent_name = "${MY_AGENT_NAME}"
+image = "${MY_AGENT_NAME}:latest"
+secret_set = "my-first-agent-secret-set"
+image_credentials = "vipyne"
 
-[config]
-min_instances = 1
-cpu = 1
-
-[secrets]
-[my-first-agent-secret-set]
+[scaling]
+	min_instances = 1

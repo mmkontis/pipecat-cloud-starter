@@ -10,7 +10,7 @@ from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineParams, PipelineTask
 from pipecat.processors.aggregators.openai_llm_context import OpenAILLMContext
-from pipecat.services.elevenlabs import ElevenLabsTTSService
+from pipecat.services.cartesia import CartesiaTTSService
 from pipecat.services.openai import OpenAILLMService
 from pipecat.transports.services.daily import DailyParams, DailyTransport
 
@@ -33,12 +33,15 @@ async def main(room_url: str, token: str):
             ),
         )
 
-        tts = ElevenLabsTTSService(
-            api_key=os.getenv("ELEVENLABS_API_KEY", ""),
-            voice_id="cgSgspJ2msm6clMCkdW9"
+        tts = CartesiaTTSService(
+            api_key=os.getenv("CARTESIA_API_KEY"), 
+            voice_id="79a125e8-cd45-4c13-8a67-188112f4dd22"
         )
 
-        llm = OpenAILLMService(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
+        llm = OpenAILLMService(
+            api_key=os.getenv("OPENAI_API_KEY"), 
+            model="gpt-4o"
+        )
 
         messages = [
             {
@@ -95,15 +98,17 @@ LOCAL_RUN = os.getenv("LOCAL_RUN")
 if LOCAL_RUN:
     import asyncio
     from local_runner import configure
+    import webbrowser
 
 async def local_main():
     async with aiohttp.ClientSession() as session:
         (room_url, token) = await configure(session)
         logger.warning(f"_")
         logger.warning(f"_")
-        logger.warning(f"Talk to your agent here: {room_url}")
+        logger.warning(f"Talk to your voice agent here: {room_url}")
         logger.warning(f"_")
         logger.warning(f"_")
+        webbrowser.open(room_url)
         await main(room_url, token)    
 
 if LOCAL_RUN and __name__ == "__main__":

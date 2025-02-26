@@ -40,12 +40,21 @@ pipecat auth login
 ```bash
 cp example.pcc-deploy.toml pcc-deploy.toml
 
-# set secrets
+# set voice agent app secrets
 pipecat secrets set my-first-agent-secret-set \
+CARTESIA_API_KEY="${CARTESIA_API_KEY}" \
 DAILY_API_KEY="${DAILY_API_KEY}" \
-ELEVENLABS_API_KEY="${ELEVENLABS_API_KEY}" \
 OPENAI_API_KEY="${OPENAI_API_KEY}"
 ```
+
+set docker image pull secret
+```bash
+pipecat secrets image-pull-secret pull-secret https://index.docker.io/v1/
+```
+dockerhub
+<your dockerhub password>
+
+
 
 - check secrets
 > sshhhh. secret values will not be listed
@@ -53,13 +62,14 @@ OPENAI_API_KEY="${OPENAI_API_KEY}"
 pipecat secrets list my-first-agent-secret-set
 ```
 
-5. run locally
+### optional
+double-secret-step 5. run locally
 # check that things are working as expected
 ```bash
+export CARTESIA_API_KEY="${CARTESIA_API_KEY}"
 export DAILY_API_KEY="${DAILY_API_KEY}"
-export ELEVENLABS_API_KEY="${ELEVENLABS_API_KEY}"
 export OPENAI_API_KEY="${OPENAI_API_KEY}"
-LOCAL_RUN=1 python bot.py 
+LOCAL_RUN=1 python bot.py
 ```
 
 
@@ -69,6 +79,18 @@ export MY_DOCKER_REPOSITORY="my-docker-repo"
 export MY_AGENT_NAME="my-first-agent"
 ```
 
+
+
+
+
+check config
+```bash
+pipecat --config
+```
+
+
+when changes are made to bot, go back to here to rerun commands
+<>
 5. push to docker
 > ensure Docker is running.
 ```bash
@@ -79,8 +101,10 @@ docker push "${MY_DOCKER_REPOSITORY}"/"${MY_AGENT_NAME}":0.1
 
 6. deploy
 ```bash
-pipecat deploy "${MY_AGENT_NAME}" "${MY_DOCKER_REPOSITORY}"/"${MY_AGENT_NAME}":0.1
+pipecat deploy "${MY_AGENT_NAME}" "${MY_DOCKER_REPOSITORY}"/"${MY_AGENT_NAME}":0.1 --credentials pull-secret
 ```
+
+
 
 6. talk to your agent
 # wip. these are just guesses.
@@ -89,11 +113,38 @@ pipecat deploy "${MY_AGENT_NAME}" "${MY_DOCKER_REPOSITORY}"/"${MY_AGENT_NAME}":0
 pipecat agent logs "${MY_AGENT_NAME}"
 pipecat agent status "${MY_AGENT_NAME}"
 
+
 pipecat organizations keys create
+? Enter human readable name for API key e.g. 'Pipecat Key' 
+=> my-first-organization-key
+
 pipecat organizations keys use
 pipecat agent start "${MY_AGENT_NAME}"
 
 pipecat agent status "${MY_AGENT_NAME}"
 ```
 
+
+
+
+
+
 # navigate to daily room url to try deployed agent
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

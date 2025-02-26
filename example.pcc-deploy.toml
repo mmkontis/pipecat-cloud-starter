@@ -1,9 +1,0 @@
-name = "${MY_AGENT_NAME}"
-image = "${MY_DOCKER_REPOSITORY}/${MY_AGENT_NAME}:0.1"
-
-[config]
-min_instances = 1
-cpu = 1
-
-[secrets]
-[my-first-agent-secret-set]
