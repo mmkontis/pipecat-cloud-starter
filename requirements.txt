@@ -2,3 +2,4 @@ python-dotenv
 asyncio
 aiohttp
 pipecat-ai[openai,daily,elevenlabs,silero]
+pipecatcloud
