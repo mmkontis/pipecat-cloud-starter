@@ -52,6 +52,10 @@ export OPENAI_API_KEY="<MY_OPENAI_API_KEY>"
 ```
 
 #### 2. setup secrets
+- `CARTESIA_API_KEY` can be found at [https://play.cartesia.ai/keys](https://play.cartesia.ai/keys)
+- `DAILY_API_KEY` can be found at [https://pipecat.daily.co](https://pipecat.daily.co) > Settings > Daily
+- `OPENAI_API_KEY` can be found at [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+
 ```bash
 # set voice agent app secrets
 pipecat secrets set "${MY_SECRET_SET}" \
