@@ -94,26 +94,3 @@ async def bot(config, room_url: str, token: str):
     logger.info(f"Bot config {config}")
     await main(room_url, token)
     logger.info("Bot process completed")
-
-###########################
-# for local test run only #
-###########################
-LOCAL_RUN = os.getenv("LOCAL_RUN")
-if LOCAL_RUN:
-    import asyncio
-    from local_runner import configure
-    import webbrowser
-
-async def local_main():
-    async with aiohttp.ClientSession() as session:
-        (room_url, token) = await configure(session)
-        logger.warning(f"_")
-        logger.warning(f"_")
-        logger.warning(f"Talk to your voice agent here: {room_url}")
-        logger.warning(f"_")
-        logger.warning(f"_")
-        webbrowser.open(room_url)
-        await main(room_url, token)    
-
-if LOCAL_RUN and __name__ == "__main__":
-    asyncio.run(local_main())

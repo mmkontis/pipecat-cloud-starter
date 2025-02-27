@@ -89,24 +89,8 @@ pipecat secrets list
 > important!
 update `secret_set` name in `pcc-deploy.toml`.  It must be a string literal (not an env var)
 
-#### double-secret-step [optional] 3. run locally
-
-- check config
-```bash
-pipecat --config
-```
-
-- check that things are working as expected
-```bash
-export CARTESIA_API_KEY="${PCC_CARTESIA_API_KEY}"
-export DAILY_API_KEY="${PCC_DAILY_API_KEY}"
-export OPENAI_API_KEY="${PCC_OPENAI_API_KEY}"
-LOCAL_RUN=1 python bot.py
-```
-
-#### regular step 3. build and push to docker
+#### 3. build and push to docker
 > ensure Docker is running. also, this may take a minute aka coffee break opportunity.
-
 ```bash
 docker build --platform linux/arm64 -t "${PCC_AGENT_NAME}" .
 docker tag "${PCC_AGENT_NAME}":latest "${PCC_DOCKER_REPOSITORY}/${PCC_AGENT_NAME}:${PCC_IMAGE_VERSION}"
@@ -145,10 +129,14 @@ pipecat organizations keys use
 ```
 
 #### 6. Run your agent
+<<<<<<< HEAD
 
 > [TEMPORARY NOTE] this is borked in pipecatcloud 0.0.8, so go to dashboard to start and talk to agent
 
 > `--use-daily` will open a daily room for you to talk to your agent
+=======
+> this is borked in pipecatcloud 0.0.8, so go to dashboard to start and talk to agent
+>>>>>>> 1b38ff0 (one more readme update)
 ```bash
 pipecat agent start "${PCC_AGENT_NAME}" --use-daily
 ```
