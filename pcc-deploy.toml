@@ -4,4 +4,4 @@ secret_set = "my-first-agent-secret-set"
 image_credentials = "${MY_IMAGE_CREDENTIALS}"
 
 [scaling]
-	min_instances = 1
+	min_instances = 0
