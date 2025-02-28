@@ -78,8 +78,12 @@ async def main(room_url: str, token: str):
         async def on_first_participant_joined(transport, participant):
             await transport.capture_participant_transcription(participant["id"])
             # Kick off the conversation.
-            messages.append({"role": "system", "content": "Please introduce yourself to the user."})
+            messages.append({"role": "system", "content": "Please start with 'Hello World' and introduce yourself to the user."})
             await task.queue_frames([LLMMessagesFrame(messages)])
+
+        @transport.event_handler("on_participant_left")
+        async def on_participant_left(transport, participant, reason):
+            await task.cancel()
 
         runner = PipelineRunner()
 
