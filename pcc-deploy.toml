@@ -1,0 +1,7 @@
+agent_name = "${MY_AGENT_NAME}"
+image = "${MY_AGENT_NAME}:latest"
+secret_set = "my-first-secret-set"
+image_credentials = "${MY_IMAGE_CREDENTIALS}"
+
+[scaling]
+	min_instances = 1

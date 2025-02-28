@@ -89,3 +89,6 @@ dmypy.json
 .pytype/
 cython_debug/
 .ipynb_checkpoints
+
+# Pipecat cloud
+.pcc-deploy.toml
