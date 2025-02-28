@@ -6,6 +6,8 @@ Template "hello world" voice agent for [Pipecat Cloud](https://www.daily.co/prod
 
 ## Dependencies
 
+> [TEMPORARY NOTE]: this requires a pipecatcloud 0.0.9 or a local checkout of [pipecat-cloud](https://github.com/daily-co/pipecat-cloud). If using a local checkout, place `-e /path/to/local/pipecat-cloud` in `requirements.txt`
+
 - Python 3.10+
 - Docker and a Docker repository (e.g. DockerHub )
 - Linux or MacOS
