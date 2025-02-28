@@ -107,14 +107,14 @@ LOCAL_RUN=1 python bot.py
 
 ```bash
 docker build --platform linux/arm64 -t "${PCC_AGENT_NAME}" .
-docker tag "${PCC_AGENT_NAME}":latest "${PCC_DOCKER_REPOSITORY}/${PCC_AGENT_NAME}:${IMAGE_VERSION}"
-docker push "${PCC_DOCKER_REPOSITORY}/${PCC_AGENT_NAME}:${IMAGE_VERSION}"
+docker tag "${PCC_AGENT_NAME}":latest "${PCC_DOCKER_REPOSITORY}/${PCC_AGENT_NAME}:${PCC_IMAGE_VERSION}"
+docker push "${PCC_DOCKER_REPOSITORY}/${PCC_AGENT_NAME}:${PCC_IMAGE_VERSION}"
 ```
 
 #### 4. deploy
 ```bash
 pipecat deploy "${PCC_AGENT_NAME}" \
-"${PCC_DOCKER_REPOSITORY}/${PCC_AGENT_NAME}:${IMAGE_VERSION}" \
+"${PCC_DOCKER_REPOSITORY}/${PCC_AGENT_NAME}:${PCC_IMAGE_VERSION}" \
 --credentials "${PCC_PULL_SECRET}"
 ```
 
