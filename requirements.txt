@@ -1,5 +1,3 @@
+pipecat-ai[cartesia,daily,openai,silero]>=0.0.58
 python-dotenv~=1.0.1
 asyncio
-aiohttp
-pipecat-ai[cartesia,daily,openai,silero]>=0.0.58
-pipecatcloud
