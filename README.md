@@ -7,8 +7,9 @@ A template voice agent for [Pipecat Cloud](https://www.daily.co/products/pipecat
 ## Prerequisites
 
 - Python 3.10+
-- [Docker](https://www.docker.com) and a Docker repository (e.g., [DockerHub](https://hub.docker.com))
 - Linux, MacOS, or Windows Subsystem for Linux (WSL)
+- [Docker](https://www.docker.com) and a Docker repository (e.g., [Docker Hub](https://hub.docker.com))
+- A Docker Hub account (or other container registry account)
 - [Pipecat Cloud](https://pipecat.daily.co) account
 
 ## Getting Started
@@ -21,6 +22,8 @@ cd pipecat-cloud-starter
 ```
 
 ### 2. Set up Python environment
+
+We recommend using a virtual environment to manage your Python dependencies.
 
 ```bash
 # Create a virtual environment
@@ -64,7 +67,7 @@ LOCAL_RUN=1 python bot.py
 ### 1. Create a secret set for your API keys
 
 ```bash
-pipecat secrets set my-first-secret-set \
+pipecat secrets set my-first-agent-secrets \
   CARTESIA_API_KEY=your_cartesia_key \
   OPENAI_API_KEY=your_openai_key
 ```
@@ -75,8 +78,8 @@ Edit the `pcc-deploy.toml` file to use your secret set:
 
 ```toml
 agent_name = "my-first-agent"
-image = "your-username/my-first-agent:latest"
-secret_set = "my-first-secret-set"
+image = "your-username/my-first-agent:0.1"
+secret_set = "my-first-agent-secrets"
 
 [scaling]
     min_instances = 0
@@ -88,29 +91,29 @@ secret_set = "my-first-secret-set"
 
 ```bash
 # Build the image (targeting ARM architecture for cloud deployment)
-docker build --platform linux/arm64 -t my-first-agent .
+docker build --platform=linux/arm64 -t my-first-agent:latest .
 
-# Tag with your Docker username
-docker tag my-first-agent your-username/my-first-agent:latest
+# Tag with your Docker username and version
+docker tag my-first-agent:latest your-username/my-first-agent:0.1
 
 # Push to Docker Hub
-docker push your-username/my-first-agent:latest
+docker push your-username/my-first-agent:0.1
 ```
 
 ### 4. Deploy to Pipecat Cloud
 
 ```bash
-pipecat deploy my-first-agent your-username/my-first-agent:latest
+pipecat deploy my-first-agent your-username/my-first-agent:0.1
 ```
 
-> Note: (Optional) If you're using a private Docker repository, add credentials:
+> Note: If your repository is private, you'll need to add credentials:
 >
 > ```bash
-> # Create pull secret (do this once)
+> # Create pull secret (you’ll be prompted for credentials)
 > pipecat secrets image-pull-secret pull-secret https://index.docker.io/v1/
 >
 > # Deploy with credentials
-> pipecat deploy my-first-agent your-username/my-first-agent:latest --credentials pull-secret
+> pipecat deploy my-first-agent your-username/my-first-agent:0.1 --credentials pull-secret
 > ```
 
 ### 5. Create an API key
