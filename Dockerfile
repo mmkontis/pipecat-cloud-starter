@@ -1,4 +1,4 @@
-FROM pipecatai/cloud-base:latest
+FROM pipecatai/base:latest
 
 COPY ./requirements.txt requirements.txt
 
