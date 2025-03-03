@@ -79,7 +79,7 @@ image = "your-username/my-first-agent:latest"
 secret_set = "my-first-secret-set"
 
 [scaling]
-    min_instances = 1
+    min_instances = 0
 ```
 
 > **Important**: The `secret_set` value must match the name you used when creating your secrets.
