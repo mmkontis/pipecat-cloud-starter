@@ -12,6 +12,8 @@ A template voice agent for [Pipecat Cloud](https://www.daily.co/products/pipecat
 - A Docker Hub account (or other container registry account)
 - [Pipecat Cloud](https://pipecat.daily.co) account
 
+> **Note**: If you haven't installed Docker yet, follow the official installation guides for your platform ([Linux](https://docs.docker.com/engine/install/), [Mac](https://docs.docker.com/desktop/setup/install/mac-install/), [Windows](https://docs.docker.com/desktop/setup/install/windows-install/)). For Docker Hub, [create a free account](https://hub.docker.com/signup) and log in via terminal with `docker login`.
+
 ## Getting Started
 
 ### 1. Clone the repository
@@ -51,7 +53,7 @@ This starter requires the following API keys:
 - **Cartesia API Key**: Get from [play.cartesia.ai/keys](https://play.cartesia.ai/keys)
 - **Daily API Key**: Automatically provided through your Pipecat Cloud account
 
-### 5. Run locally (optional)
+### 5. Configure to run locally (optional)
 
 You can test your agent locally before deploying to Pipecat Cloud:
 
@@ -72,22 +74,7 @@ pipecat secrets set my-first-agent-secrets \
   OPENAI_API_KEY=your_openai_key
 ```
 
-### 2. Update deployment configuration
-
-Edit the `pcc-deploy.toml` file to use your secret set:
-
-```toml
-agent_name = "my-first-agent"
-image = "your-username/my-first-agent:0.1"
-secret_set = "my-first-agent-secrets"
-
-[scaling]
-    min_instances = 0
-```
-
-> **Important**: The `secret_set` value must match the name you used when creating your secrets.
-
-### 3. Build and push your Docker image
+### 2. Build and push your Docker image
 
 ```bash
 # Build the image (targeting ARM architecture for cloud deployment)
@@ -100,23 +87,36 @@ docker tag my-first-agent:latest your-username/my-first-agent:0.1
 docker push your-username/my-first-agent:0.1
 ```
 
-### 4. Deploy to Pipecat Cloud
+### 3. Deploy to Pipecat Cloud
 
 ```bash
 pipecat deploy my-first-agent your-username/my-first-agent:0.1
 ```
 
-> Note: If your repository is private, you'll need to add credentials:
+> **Note (Optional)**: For a more maintainable approach, you can use the included `pcc-deploy.toml` file:
+>
+> ```toml
+> agent_name = "my-first-agent"
+> image = "your-username/my-first-agent:0.1"
+> secret_set = "my-first-agent-secrets"
+>
+> [scaling]
+>     min_instances = 0
+> ```
+>
+> Then simply run `pipecat deploy` without additional arguments.
+
+> **Note**: If your repository is private, you'll need to add credentials:
 >
 > ```bash
-> # Create pull secret (you’ll be prompted for credentials)
+> # Create pull secret (you'll be prompted for credentials)
 > pipecat secrets image-pull-secret pull-secret https://index.docker.io/v1/
 >
 > # Deploy with credentials
 > pipecat deploy my-first-agent your-username/my-first-agent:0.1 --credentials pull-secret
 > ```
 
-### 5. Create an API key
+### 4. Create an API key
 
 ```bash
 # Create a public API key for accessing your agent
@@ -126,7 +126,7 @@ pipecat organizations keys create
 pipecat organizations keys use
 ```
 
-### 6. Start your agent
+### 5. Start your agent
 
 ```bash
 # Start a session with your agent in a Daily room
