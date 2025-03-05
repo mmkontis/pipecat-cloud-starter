@@ -16,11 +16,20 @@ A template voice agent for [Pipecat Cloud](https://www.daily.co/products/pipecat
 
 ## Getting Started
 
-### 1. Clone the repository
+### 1. Get the starter project
+
+Clone the starter project from GitHub:
 
 ```bash
 git clone https://github.com/pipecat-ai/pipecat-cloud-starter
 cd pipecat-cloud-starter
+```
+
+or use the Pipecat Cloud CLI to initialize a new project:
+
+```bash
+mkdir pipecat-cloud-starter && cd pipecat-cloud-starter
+pcc init
 ```
 
 ### 2. Set up Python environment
@@ -42,7 +51,7 @@ pip install pipecatcloud
 ### 3. Authenticate with Pipecat Cloud
 
 ```bash
-pipecat auth login
+pcc auth login
 ```
 
 ### 4. Acquire required API keys
@@ -56,6 +65,7 @@ This starter requires the following API keys:
 ### 5. Configure to run locally (optional)
 
 You can test your agent locally before deploying to Pipecat Cloud:
+
 - `DAILY_API_KEY` value can be found at [https://pipecat.daily.co](https://pipecat.daily.co) Under the `Settings` menu of your agent, in the `Daily` tab.
 
 ```bash
@@ -71,7 +81,7 @@ LOCAL_RUN=1 python bot.py
 ### 1. Create a secret set for your API keys
 
 ```bash
-pipecat secrets set my-first-agent-secrets \
+pcc secrets set my-first-agent-secrets \
   CARTESIA_API_KEY=your_cartesia_key \
   OPENAI_API_KEY=your_openai_key
 ```
@@ -92,7 +102,7 @@ docker push your-username/my-first-agent:0.1
 ### 3. Deploy to Pipecat Cloud
 
 ```bash
-pipecat deploy my-first-agent your-username/my-first-agent:0.1
+pcc deploy my-first-agent your-username/my-first-agent:0.1
 ```
 
 > **Note (Optional)**: For a more maintainable approach, you can use the included `pcc-deploy.toml` file:
@@ -106,33 +116,49 @@ pipecat deploy my-first-agent your-username/my-first-agent:0.1
 >     min_instances = 0
 > ```
 >
-> Then simply run `pipecat deploy` without additional arguments.
+> Then simply run `pcc deploy` without additional arguments.
 
 > **Note**: If your repository is private, you'll need to add credentials:
 >
 > ```bash
 > # Create pull secret (you'll be prompted for credentials)
-> pipecat secrets image-pull-secret pull-secret https://index.docker.io/v1/
+> pcc secrets image-pull-secret pull-secret https://index.docker.io/v1/
 >
 > # Deploy with credentials
-> pipecat deploy my-first-agent your-username/my-first-agent:0.1 --credentials pull-secret
+> pcc deploy my-first-agent your-username/my-first-agent:0.1 --credentials pull-secret
 > ```
 
-### 4. Create an API key
+### 4. Check deployment and scaling (optional)
+
+By default, your agent will use "scale-to-zero" configuration, which means it may have a cold start of around 10 seconds when first used. By default, idle instances are maintained for 5 minutes before being terminated when using scale-to-zero.
+
+For more responsive testing, you can scale your deployment to keep a minimum of one instance warm:
+
+```bash
+# Ensure at least one warm instance is always available
+pcc deploy my-first-agent your-username/my-first-agent:0.1 --min-instances 1
+
+# Check the status of your deployment
+pcc agent status my-first-agent
+```
+
+By default, idle instances are maintained for 5 minutes before being terminated when using scale-to-zero.
+
+### 5. Create an API key
 
 ```bash
 # Create a public API key for accessing your agent
-pipecat organizations keys create
+pcc organizations keys create
 
 # Set it as the default key to use with your agent
-pipecat organizations keys use
+pcc organizations keys use
 ```
 
-### 5. Start your agent
+### 6. Start your agent
 
 ```bash
 # Start a session with your agent in a Daily room
-pipecat agent start my-first-agent --use-daily
+pcc agent start my-first-agent --use-daily
 ```
 
 This will return a URL, which you can use to connect to your running agent.
