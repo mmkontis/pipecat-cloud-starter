@@ -16,23 +16,7 @@ A template voice agent for [Pipecat Cloud](https://www.daily.co/products/pipecat
 
 ## Getting Started
 
-### 1. Get the starter project
-
-Clone the starter project from GitHub:
-
-```bash
-git clone https://github.com/pipecat-ai/pipecat-cloud-starter
-cd pipecat-cloud-starter
-```
-
-or use the Pipecat Cloud CLI to initialize a new project:
-
-```bash
-mkdir pipecat-cloud-starter && cd pipecat-cloud-starter
-pcc init
-```
-
-### 2. Set up Python environment
+### 1. Set up Python environment
 
 We recommend using a virtual environment to manage your Python dependencies.
 
@@ -46,6 +30,22 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 pip install pipecatcloud
+```
+
+### 2. Get the starter project
+
+Clone the starter project from GitHub:
+
+```bash
+git clone https://github.com/pipecat-ai/pipecat-cloud-starter
+cd pipecat-cloud-starter
+```
+
+or use the Pipecat Cloud CLI to initialize a new project:
+
+```bash
+mkdir pipecat-cloud-starter && cd pipecat-cloud-starter
+pcc init
 ```
 
 ### 3. Authenticate with Pipecat Cloud
