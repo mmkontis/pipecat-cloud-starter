@@ -78,15 +78,7 @@ LOCAL_RUN=1 python bot.py
 
 ## Deploy & Run
 
-### 1. Create a secret set for your API keys
-
-```bash
-pcc secrets set my-first-agent-secrets \
-  CARTESIA_API_KEY=your_cartesia_key \
-  OPENAI_API_KEY=your_openai_key
-```
-
-### 2. Build and push your Docker image
+### 1. Build and push your Docker image
 
 ```bash
 # Build the image (targeting ARM architecture for cloud deployment)
@@ -97,6 +89,30 @@ docker tag my-first-agent:latest your-username/my-first-agent:0.1
 
 # Push to Docker Hub
 docker push your-username/my-first-agent:0.1
+```
+
+### 2. Create a secret set for your API keys
+
+The starter project requires API keys for OpenAI and Cartesia:
+
+```bash
+# Copy the example env file
+cp env.example .env
+
+# Edit .env to add your API keys:
+# CARTESIA_API_KEY=your_cartesia_key
+# OPENAI_API_KEY=your_openai_key
+
+# Create a secret set from your .env file
+pcc secrets set my-first-agent-secrets --file .env
+```
+
+Alternatively, you can create secrets directly via CLI:
+
+```bash
+pcc secrets set my-first-agent-secrets \
+  CARTESIA_API_KEY=your_cartesia_key \
+  OPENAI_API_KEY=your_openai_key
 ```
 
 ### 3. Deploy to Pipecat Cloud
