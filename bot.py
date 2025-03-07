@@ -20,10 +20,29 @@ from pipecat.services.cartesia import CartesiaTTSService
 from pipecat.services.openai import OpenAILLMService
 from pipecat.transports.services.daily import DailyParams, DailyTransport
 
+# Check if we're in local development mode
+LOCAL_RUN = os.getenv("LOCAL_RUN")
+if LOCAL_RUN:
+    import asyncio
+    import webbrowser
+
+    try:
+        from local_runner import configure
+    except ImportError:
+        logger.error("Could not import local_runner module. Local development mode may not work.")
+
+# Load environment variables
 load_dotenv(override=True)
 
 
 async def main(room_url: str, token: str, session_logger=None):
+    """Main pipeline setup and execution function.
+
+    Args:
+        room_url: The Daily room URL
+        token: The Daily room token
+        session_logger: Optional logger instance
+    """
     log = session_logger or logger
 
     log.debug("Starting bot in room: {}", room_url)
@@ -123,28 +142,26 @@ async def bot(config, room_url: str, token: str, session_id=None, session_logger
         raise
 
 
-###########################
-# for local test run only #
-###########################
-LOCAL_RUN = os.getenv("LOCAL_RUN")
-if LOCAL_RUN:
-    import asyncio
-    import webbrowser
-
-    from local_runner import configure
-
-
+# Local development functions
 async def local_main():
-    async with aiohttp.ClientSession() as session:
-        (room_url, token) = await configure(session)
-        logger.warning("_")
-        logger.warning("_")
-        logger.warning(f"Talk to your voice agent here: {room_url}")
-        logger.warning("_")
-        logger.warning("_")
-        webbrowser.open(room_url)
-        await main(room_url, token)
+    """Function for local development testing."""
+    try:
+        async with aiohttp.ClientSession() as session:
+            (room_url, token) = await configure(session)
+            logger.warning("_")
+            logger.warning("_")
+            logger.warning(f"Talk to your voice agent here: {room_url}")
+            logger.warning("_")
+            logger.warning("_")
+            webbrowser.open(room_url)
+            await main(room_url, token)
+    except Exception as e:
+        logger.exception(f"Error in local development mode: {e}")
 
 
+# Local development entry point
 if LOCAL_RUN and __name__ == "__main__":
-    asyncio.run(local_main())
+    try:
+        asyncio.run(local_main())
+    except Exception as e:
+        logger.exception(f"Failed to run in local mode: {e}")
