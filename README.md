@@ -66,13 +66,18 @@ This starter requires the following API keys:
 
 You can test your agent locally before deploying to Pipecat Cloud:
 
-- `DAILY_API_KEY` value can be found at [https://pipecat.daily.co](https://pipecat.daily.co) Under the `Settings` menu of your agent, in the `Daily` tab.
-
 ```bash
 # Set environment variables with your API keys
 export CARTESIA_API_KEY="your_cartesia_key"
 export DAILY_API_KEY="your_daily_key"
 export OPENAI_API_KEY="your_openai_key"
+```
+
+> Your `DAILY_API_KEY` can be found at [https://pipecat.daily.co](https://pipecat.daily.co) under the `Settings` in the `Daily (WebRTC)` tab.
+
+Launch the bot.py script locally:
+
+```bash
 LOCAL_RUN=1 python bot.py
 ```
 
