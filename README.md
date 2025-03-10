@@ -123,7 +123,7 @@ pcc secrets set my-first-agent-secrets \
 ### 3. Deploy to Pipecat Cloud
 
 ```bash
-pcc deploy my-first-agent your-username/my-first-agent:0.1
+pcc deploy my-first-agent your-username/my-first-agent:0.1 --secrets my-first-agent-secrets
 ```
 
 > **Note (Optional)**: For a more maintainable approach, you can use the included `pcc-deploy.toml` file:
@@ -142,7 +142,7 @@ pcc deploy my-first-agent your-username/my-first-agent:0.1
 > **Note**: If your repository is private, you'll need to add credentials:
 >
 > ```bash
-> # Create pull secret (you'll be prompted for credentials)
+> # Create pull secret (you’ll be prompted for credentials)
 > pcc secrets image-pull-secret pull-secret https://index.docker.io/v1/
 >
 > # Deploy with credentials
