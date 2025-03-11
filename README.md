@@ -27,8 +27,7 @@ python -m venv venv
 # Activate it
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install dependencies
-pip install -r requirements.txt
+# Install the Pipecat Cloud CLI
 pip install pipecatcloud
 ```
 
