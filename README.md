@@ -74,7 +74,13 @@ export OPENAI_API_KEY="your_openai_key"
 
 > Your `DAILY_API_KEY` can be found at [https://pipecat.daily.co](https://pipecat.daily.co) under the `Settings` in the `Daily (WebRTC)` tab.
 
-Launch the bot.py script locally:
+First install requirements:
+
+```bash
+pip install -r requirements.txt
+```
+
+Then, launch the bot.py script locally:
 
 ```bash
 LOCAL_RUN=1 python bot.py
