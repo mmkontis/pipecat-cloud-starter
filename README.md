@@ -4,6 +4,8 @@
 
 A template voice agent for [Pipecat Cloud](https://www.daily.co/products/pipecat-cloud/) that demonstrates building and deploying a conversational AI agent.
 
+> **For a detailed step-by-step guide, see our [Quickstart Documentation](https://docs.pipecat.daily.co/quickstart).**
+
 ## Prerequisites
 
 - Python 3.10+
@@ -16,22 +18,7 @@ A template voice agent for [Pipecat Cloud](https://www.daily.co/products/pipecat
 
 ## Getting Started
 
-### 1. Set up Python environment
-
-We recommend using a virtual environment to manage your Python dependencies.
-
-```bash
-# Create a virtual environment
-python -m venv venv
-
-# Activate it
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install the Pipecat Cloud CLI
-pip install pipecatcloud
-```
-
-### 2. Get the starter project
+### 1. Get the starter project
 
 Clone the starter project from GitHub:
 
@@ -40,11 +27,19 @@ git clone https://github.com/daily-co/pipecat-cloud-starter
 cd pipecat-cloud-starter
 ```
 
-or use the Pipecat Cloud CLI to initialize a new project:
+### 2. Set up your Python environment
+
+We recommend using a virtual environment to manage your Python dependencies.
 
 ```bash
-mkdir pipecat-cloud-starter && cd pipecat-cloud-starter
-pcc init
+# Create a virtual environment
+python -m venv .venv
+
+# Activate it
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install the Pipecat Cloud CLI
+pip install pipecatcloud
 ```
 
 ### 3. Authenticate with Pipecat Cloud
