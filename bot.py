@@ -9,7 +9,6 @@ import os
 import aiohttp
 from dotenv import load_dotenv
 from loguru import logger
-
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.frames.frames import LLMMessagesFrame
 from pipecat.pipeline.pipeline import Pipeline
@@ -36,7 +35,7 @@ if LOCAL_RUN:
 load_dotenv(override=True)
 
 
-async def main(room_url: str, token: str, session_logger=None):
+async def main(room_url: str, token: str):
     """Main pipeline setup and execution function.
 
     Args:
@@ -44,9 +43,7 @@ async def main(room_url: str, token: str, session_logger=None):
         token: The Daily room token
         session_logger: Optional logger instance
     """
-    log = session_logger or logger
-
-    log.debug("Starting bot in room: {}", room_url)
+    logger.debug("Starting bot in room: {}", room_url)
 
     async with aiohttp.ClientSession() as session:
         transport = DailyTransport(
@@ -100,7 +97,7 @@ async def main(room_url: str, token: str, session_logger=None):
 
         @transport.event_handler("on_first_participant_joined")
         async def on_first_participant_joined(transport, participant):
-            log.info("First participant joined: {}", participant["id"])
+            logger.info("First participant joined: {}", participant["id"])
             await transport.capture_participant_transcription(participant["id"])
             # Kick off the conversation.
             messages.append(
@@ -113,7 +110,7 @@ async def main(room_url: str, token: str, session_logger=None):
 
         @transport.event_handler("on_participant_left")
         async def on_participant_left(transport, participant, reason):
-            log.info("Participant left: {}", participant)
+            logger.info("Participant left: {}", participant)
             await task.cancel()
 
         runner = PipelineRunner()
@@ -131,15 +128,14 @@ async def bot(args: DailySessionArguments):
         session_id: The session ID for logging
         session_logger: The session-specific logger
     """
-    log = args.session_logger or logger
-    log.info(f"Bot process initialized {args.room_url} {args.token}")
-    log.info(f"Bot config {args.config}")
+    logger.info(f"Bot process initialized {args.room_url} {args.token}")
+    logger.info(f"Bot config {args.config}")
 
     try:
-        await main(args.room_url, args.token, args.session_logger)
-        log.info("Bot process completed")
+        await main(args.room_url, args.token)
+        logger.info("Bot process completed")
     except Exception as e:
-        log.exception(f"Error in bot process: {str(e)}")
+        logger.exception(f"Error in bot process: {str(e)}")
         raise
 
 
