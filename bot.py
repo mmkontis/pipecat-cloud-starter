@@ -128,7 +128,6 @@ async def bot(args: DailySessionArguments):
         session_logger: The session-specific logger
     """
     logger.info(f"Bot process initialized {args.room_url} {args.token}")
-    logger.info(f"Bot config {args.config}")
 
     try:
         await main(args.room_url, args.token)
