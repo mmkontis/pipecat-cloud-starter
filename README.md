@@ -16,7 +16,7 @@ A template voice agent for [Pipecat Cloud](https://www.daily.co/products/pipecat
 
 > **Note**: If you haven't installed Docker yet, follow the official installation guides for your platform ([Linux](https://docs.docker.com/engine/install/), [Mac](https://docs.docker.com/desktop/setup/install/mac-install/), [Windows](https://docs.docker.com/desktop/setup/install/windows-install/)). For Docker Hub, [create a free account](https://hub.docker.com/signup) and log in via terminal with `docker login`.
 
-## Getting Started
+## Get Started
 
 ### 1. Get the starter project
 
