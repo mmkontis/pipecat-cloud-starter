@@ -15,10 +15,11 @@ from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineParams, PipelineTask
 from pipecat.processors.aggregators.openai_llm_context import OpenAILLMContext
-from pipecat.services.cartesia import CartesiaTTSService
+from pipecat.services.elevenlabs import ElevenLabsTTSService
 from pipecat.services.openai import OpenAILLMService
 from pipecat.transports.services.daily import DailyParams, DailyTransport
 from pipecatcloud.agent import DailySessionArguments
+from pipecat_flows import FlowManager, FlowConfig, FlowArgs, FlowResult
 
 # Check if we're in local development mode
 LOCAL_RUN = os.getenv("LOCAL_RUN")
@@ -34,6 +35,122 @@ if LOCAL_RUN:
 # Load environment variables
 load_dotenv(override=True)
 
+# Define flow configuration
+flow_config: FlowConfig = {
+    "initial_node": "greeting",
+    "nodes": {
+        "greeting": {
+            "role_messages": [
+                {
+                    "role": "system",
+                    "content": "You are a friendly hotel room service assistant. Keep responses professional yet warm."
+                }
+            ],
+            "task_messages": [
+                {
+                    "role": "system",
+                    "content": "Welcome the guest and ask for their name."
+                }
+            ],
+            "functions": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "collect_name",
+                        "description": "Collect guest's name",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"}
+                            },
+                            "required": ["name"]
+                        },
+                        "transition_to": "confirm_name"
+                    }
+                }
+            ]
+        },
+        "confirm_name": {
+            "task_messages": [
+                {
+                    "role": "system",
+                    "content": "Confirm the guest's name and ask for their room number."
+                }
+            ],
+            "functions": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "collect_room",
+                        "description": "Collect guest's room number",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "room_number": {"type": "string"}
+                            },
+                            "required": ["room_number"]
+                        },
+                        "transition_to": "confirm_room"
+                    }
+                }
+            ]
+        },
+        "confirm_room": {
+            "task_messages": [
+                {
+                    "role": "system",
+                    "content": "Confirm the room number and ask for their food order."
+                }
+            ],
+            "functions": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "collect_order",
+                        "description": "Collect guest's food order",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "order": {"type": "string"}
+                            },
+                            "required": ["order"]
+                        },
+                        "transition_to": "confirm_order"
+                    }
+                }
+            ]
+        },
+        "confirm_order": {
+            "task_messages": [
+                {
+                    "role": "system",
+                    "content": "Confirm the complete order and ask if they need anything else."
+                }
+            ],
+            "functions": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "end_conversation",
+                        "description": "End the conversation",
+                        "parameters": {"type": "object", "properties": {}},
+                        "transition_to": "end"
+                    }
+                }
+            ]
+        },
+        "end": {
+            "task_messages": [
+                {
+                    "role": "system",
+                    "content": "Thank the guest and provide the estimated delivery time."
+                }
+            ],
+            "functions": [],
+            "post_actions": [{"type": "end_conversation"}]
+        }
+    }
+}
 
 async def main(room_url: str, token: str):
     """Main pipeline setup and execution function.
@@ -56,20 +173,28 @@ async def main(room_url: str, token: str):
         ),
     )
 
-    tts = CartesiaTTSService(
-        api_key=os.getenv("CARTESIA_API_KEY"), voice_id="79a125e8-cd45-4c13-8a67-188112f4dd22"
+    tts = ElevenLabsTTSService(
+        api_key=os.getenv("ELEVENLABS_API_KEY"),
+        voice_id="21m00Tcm4TlvDq8ikWAM",  # Rachel voice - natural, friendly female voice
+        model_id="eleven_monolingual_v1",
+        optimize_streaming_latency=2,  # Reduce latency
+        stability=0.5,  # Balance between stability and variability
+        similarity_boost=0.75,  # Higher voice clarity and similarity
+        style=0.5,  # Balanced speaking style
+        use_speaker_boost=True  # Enhance voice clarity
     )
 
-    llm = OpenAILLMService(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
+    llm = OpenAILLMService(
+        api_key=os.getenv("OPENAI_API_KEY"),
+        model="gpt-4o",
+        temperature=0.95,
+        max_tokens=2048,
+        top_p=0.95,
+        frequency_penalty=0.5,
+        presence_penalty=0.5,
+    )
 
-    messages = [
-        {
-            "role": "system",
-            "content": "You are a helpful LLM in a WebRTC call. Your goal is to demonstrate your capabilities in a succinct way. Your output will be converted to audio so don't include special characters in your answers. Respond to what the user said in a creative and helpful way.",
-        },
-    ]
-
-    context = OpenAILLMContext(messages)
+    context = OpenAILLMContext()
     context_aggregator = llm.create_context_aggregator(context)
 
     pipeline = Pipeline(
@@ -93,18 +218,20 @@ async def main(room_url: str, token: str):
         ),
     )
 
+    # Initialize flow manager
+    flow_manager = FlowManager(
+        task=task,
+        llm=llm,
+        context_aggregator=context_aggregator,
+        tts=tts,
+        flow_config=flow_config,
+    )
+
     @transport.event_handler("on_first_participant_joined")
     async def on_first_participant_joined(transport, participant):
         logger.info("First participant joined: {}", participant["id"])
         await transport.capture_participant_transcription(participant["id"])
-        # Kick off the conversation.
-        messages.append(
-            {
-                "role": "system",
-                "content": "Please start with 'Hello World' and introduce yourself to the user.",
-            }
-        )
-        await task.queue_frames([LLMMessagesFrame(messages)])
+        await flow_manager.initialize()
 
     @transport.event_handler("on_participant_left")
     async def on_participant_left(transport, participant, reason):

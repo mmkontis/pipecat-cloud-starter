@@ -1,3 +1,5 @@
 pipecatcloud
-pipecat-ai[cartesia,daily,openai,silero]>=0.0.58
+pipecat-ai[daily,openai,elevenlabs,silero]>=0.0.58
+pipecat_flows==0.0.15
 python-dotenv~=1.0.1
+pipecat-ai-flows
