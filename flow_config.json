@@ -1,0 +1,258 @@
+{
+    "initial_node": "greeting",
+    "nodes": {
+        "greeting": {
+            "role_messages": [
+                {
+                    "role": "system",
+                    "content": "You are Minas Marios Kontis, founder of Univation and host of the 'AI Greece' podcast. You are interviewing a prominent guest about AI, innovation, and the tech ecosystem in Greece. Be insightful, curious, and engaging. Reference your background as an entrepreneur (Univation, Forbes 30 Under 30) where relevant to build rapport or ask specific questions. You're hosting Olga owner of stonesoup coworking to talk about coworking ai and more"
+                }
+            ],
+            "task_messages": [
+                {
+                    "role": "system",
+                    "content": "Welcome the guest to the 'AI Greece' podcast. Briefly introduce yourself as Minas Marios Kontis, founder of Univation. Ask the guest to introduce themselves, tell the listeners a bit about their background, and describe their primary role (e.g., founder, developer, politician, community builder)."
+                }
+            ],
+            "functions": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "route_guest_conversation",
+                        "description": "Based on the guest's introduction and primary role, determine the appropriate next step in the conversation.",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "introduction": {"type": "string", "description": "Guest's self-introduction and background."},
+                                "role": {
+                                    "type": "string",
+                                    "description": "The primary professional role of the guest.",
+                                    "enum": ["founder", "politician", "developer", "community_builder", "researcher", "investor", "other"]
+                                }
+                            },
+                            "required": ["introduction", "role"]
+                        }
+                    }
+                }
+            ]
+        },
+        "community_builder_start": {
+            "task_messages": [
+                {
+                    "role": "system",
+                    "content": "Transition to asking questions relevant to a community builder or coworking space owner. Start by asking about the importance of community in the tech/innovation ecosystem."
+                }
+            ],
+            "functions": [
+                 {
+                    "type": "function",
+                    "function": {
+                        "name": "ask_community_importance",
+                        "description": "Ask about the role and importance of community in fostering innovation.",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "response": {"type": "string"}
+                            },
+                            "required": ["response"]
+                        },
+                        "transition_to": "community_ai_integration"
+                    }
+                }
+            ]
+        },
+        "founder_start": {
+            "task_messages": [
+                {
+                    "role": "system",
+                    "content": "Transition to asking questions relevant to a startup founder. Start by asking about the origin story of their company."
+                }
+            ],
+             "functions": [
+                 {
+                    "type": "function",
+                    "function": {
+                        "name": "ask_founder_origin_story",
+                        "description": "Ask the founder about the founding story of their startup.",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "response": {"type": "string"}
+                            },
+                            "required": ["response"]
+                        },
+                        "transition_to": "founder_challenges"
+                    }
+                }
+            ]
+        },
+        "developer_start": {
+            "task_messages": [
+                {
+                    "role": "system",
+                    "content": "Transition to asking questions relevant to a developer. Start by asking about the technologies they are most excited about right now, especially regarding AI."
+                }
+            ],
+             "functions": [
+                 {
+                    "type": "function",
+                    "function": {
+                        "name": "ask_developer_tech_interest",
+                        "description": "Ask the developer about exciting technologies, particularly in AI.",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "response": {"type": "string"}
+                            },
+                            "required": ["response"]
+                        },
+                        "transition_to": "developer_challenges"
+                    }
+                }
+            ]
+        },
+        "community_ai_integration": {
+             "task_messages": [
+                {
+                    "role": "system",
+                    "content": "Ask how they see AI impacting coworking spaces or the communities they build. Are there tools or applications they are exploring?"
+                }
+            ],
+             "functions": [
+                 {
+                    "type": "function",
+                    "function": {
+                        "name": "collect_community_ai_impact",
+                        "description": "Collect thoughts on AI impact on communities/coworking.",
+                        "parameters": { "type": "object", "properties": { "response": {"type": "string"}},"required": ["response"]},
+                        "transition_to": "challenges_opportunities"
+                    }
+                }
+             ]
+        },
+         "founder_challenges": {
+             "task_messages": [
+                {
+                    "role": "system",
+                    "content": "Ask the founder about the biggest challenge they faced building their startup."
+                }
+            ],
+             "functions": [
+                 {
+                    "type": "function",
+                    "function": {
+                        "name": "collect_founder_challenges",
+                        "description": "Collect founder's biggest challenge.",
+                        "parameters": { "type": "object", "properties": { "response": {"type": "string"}},"required": ["response"]},
+                        "transition_to": "challenges_opportunities"
+                    }
+                }
+             ]
+        },
+        "developer_challenges": {
+             "task_messages": [
+                {
+                    "role": "system",
+                    "content": "Ask the developer about the main technical challenges they face in their current work, especially if related to AI implementation."
+                }
+            ],
+             "functions": [
+                 {
+                    "type": "function",
+                    "function": {
+                        "name": "collect_developer_challenges",
+                        "description": "Collect developer's technical challenges.",
+                        "parameters": { "type": "object", "properties": { "response": {"type": "string"}},"required": ["response"]},
+                        "transition_to": "challenges_opportunities"
+                    }
+                }
+             ]
+        },
+        "challenges_opportunities": {
+            "task_messages": [
+                {
+                    "role": "system",
+                    "content": "Ask about the biggest challenges and opportunities they see for AI development and adoption in Greece from their perspective."
+                }
+            ],
+            "functions": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "collect_challenges_opportunities",
+                        "description": "Collect the guest's views on challenges and opportunities in the Greek AI scene based on their role.",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "challenges_opportunities": {"type": "string"}
+                            },
+                            "required": ["challenges_opportunities"]
+                        },
+                        "transition_to": "future_outlook"
+                    }
+                }
+            ]
+        },
+        "future_outlook": {
+            "task_messages": [
+                {
+                    "role": "system",
+                    "content": "Ask the guest for their predictions about the future of AI in Greece over the next 5-10 years. What advice would they give to others in their field (or aspiring entrants)?"
+                }
+            ],
+            "functions": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "collect_future_outlook",
+                        "description": "Collect the guest's predictions and role-specific advice regarding the future of AI in Greece.",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "outlook_advice": {"type": "string"}
+                            },
+                            "required": ["outlook_advice"]
+                        },
+                        "transition_to": "closing_remarks"
+                    }
+                }
+            ]
+        },
+        "closing_remarks": {
+            "task_messages": [
+                {
+                    "role": "system",
+                    "content": "Thank the guest for sharing their insights on the 'AI Greece' podcast. Briefly summarize a key takeaway. Mention where listeners can find out more about the guest or their work. Allow a moment for the guest to respond before signing off completely."
+                }
+            ],
+            "functions": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "acknowledge_closing",
+                        "description": "Acknowledge the guest's final remarks or thanks.",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "acknowledgement": {"type": "string", "description": "Capture the guest's final words or acknowledgement."}
+                            },
+                            "required": ["acknowledgement"]
+                        },
+                        "transition_to": "final_goodbye"
+                    }
+                }
+            ],
+            "post_actions": []
+        },
+        "final_goodbye": {
+            "task_messages": [
+                 {
+                     "role": "system",
+                     "content": "Politely end the call."
+                 }
+             ],
+             "functions": [],
+             "post_actions": [{"type": "end_conversation"}]
+        }
+    }
+} 

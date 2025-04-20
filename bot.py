@@ -5,6 +5,7 @@
 #
 
 import os
+import json
 
 import aiohttp
 from dotenv import load_dotenv
@@ -20,6 +21,12 @@ from pipecat.services.openai import OpenAILLMService
 from pipecat.transports.services.daily import DailyParams, DailyTransport
 from pipecatcloud.agent import DailySessionArguments
 from pipecat_flows import FlowManager, FlowConfig, FlowArgs, FlowResult
+from pipecat.transports.services.helpers.daily_rest import (
+    DailyMeetingTokenParams,
+    DailyMeetingTokenProperties,
+    DailyRESTHelper,
+    DailyRoomProperties,
+)
 
 # Check if we're in local development mode
 LOCAL_RUN = os.getenv("LOCAL_RUN")
@@ -35,163 +42,119 @@ if LOCAL_RUN:
 # Load environment variables
 load_dotenv(override=True)
 
-# Define flow configuration
-flow_config: FlowConfig = {
-    "initial_node": "greeting",
-    "nodes": {
-        "greeting": {
-            "role_messages": [
-                {
-                    "role": "system",
-                    "content": "You are a friendly hotel room service assistant. Keep responses professional yet warm."
-                }
-            ],
-            "task_messages": [
-                {
-                    "role": "system",
-                    "content": "Welcome the guest and ask for their name."
-                }
-            ],
-            "functions": [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "collect_name",
-                        "description": "Collect guest's name",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "name": {"type": "string"}
-                            },
-                            "required": ["name"]
-                        },
-                        "transition_to": "confirm_name"
-                    }
-                }
-            ]
-        },
-        "confirm_name": {
-            "task_messages": [
-                {
-                    "role": "system",
-                    "content": "Confirm the guest's name and ask for their room number."
-                }
-            ],
-            "functions": [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "collect_room",
-                        "description": "Collect guest's room number",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "room_number": {"type": "string"}
-                            },
-                            "required": ["room_number"]
-                        },
-                        "transition_to": "confirm_room"
-                    }
-                }
-            ]
-        },
-        "confirm_room": {
-            "task_messages": [
-                {
-                    "role": "system",
-                    "content": "Confirm the room number and ask for their food order."
-                }
-            ],
-            "functions": [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "collect_order",
-                        "description": "Collect guest's food order",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "order": {"type": "string"}
-                            },
-                            "required": ["order"]
-                        },
-                        "transition_to": "confirm_order"
-                    }
-                }
-            ]
-        },
-        "confirm_order": {
-            "task_messages": [
-                {
-                    "role": "system",
-                    "content": "Confirm the complete order and ask if they need anything else."
-                }
-            ],
-            "functions": [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "end_conversation",
-                        "description": "End the conversation",
-                        "parameters": {"type": "object", "properties": {}},
-                        "transition_to": "end"
-                    }
-                }
-            ]
-        },
-        "end": {
-            "task_messages": [
-                {
-                    "role": "system",
-                    "content": "Thank the guest and provide the estimated delivery time."
-                }
-            ],
-            "functions": [],
-            "post_actions": [{"type": "end_conversation"}]
-        }
-    }
-}
+# Load flow configuration from JSON file
+try:
+    with open("flow_config.json", "r") as f:
+        flow_config: FlowConfig = json.load(f)
+except FileNotFoundError:
+    logger.error("flow_config.json not found. Please ensure the file exists.")
+    # Provide a default empty config or raise an error to prevent running without a flow
+    flow_config: FlowConfig = {"initial_node": None, "nodes": {}}
+except json.JSONDecodeError as e:
+    logger.error(f"Error decoding flow_config.json: {e}")
+    # Provide a default empty config or raise an error
+    flow_config: FlowConfig = {"initial_node": None, "nodes": {}}
 
 async def main(room_url: str, token: str):
     """Main pipeline setup and execution function.
 
     Args:
         room_url: The Daily room URL
-        token: The Daily room token
+        token: The Daily room token (will be replaced with owner token)
     """
     logger.debug("Starting bot in room: {}", room_url)
 
+    # First update the room configuration to enable cloud recording
+    # This should persist even if our token approach doesn't work
+    async with aiohttp.ClientSession() as session:
+        try:
+            # Initialize REST helper with the API key
+            daily_rest_helper = DailyRESTHelper(
+                daily_api_key=os.getenv("DAILY_API_KEY"),
+                daily_api_url=os.getenv("DAILY_API_URL", "https://api.daily.co/v1"),
+                aiohttp_session=session,
+            )
+            
+            # Get the room name from the URL
+            room_name = daily_rest_helper.get_name_from_url(room_url)
+            
+            # Update the room's properties to enable cloud recording by default
+            # Note: This is a PUT request to update existing room
+            url = f"https://api.daily.co/v1/rooms/{room_name}"
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {os.getenv('DAILY_API_KEY')}"
+            }
+            data = {
+                "properties": {
+                    "enable_recording": "cloud"
+                }
+            }
+            
+            async with session.put(url, headers=headers, json=data) as response:
+                resp_json = await response.json()
+                if response.status == 200:
+                    logger.info(f"Successfully updated room {room_name} to enable cloud recording")
+                else:
+                    logger.error(f"Failed to update room properties: {resp_json}")
+            
+            # Now generate a new owner token for maximum permissions
+            new_token = await daily_rest_helper.get_token(
+                room_url=room_url,
+                owner=True,  # This ensures the token has owner privileges
+                expiry_time=3600,  # 1 hour
+                params=DailyMeetingTokenParams(
+                    properties=DailyMeetingTokenProperties(
+                        user_name="AI Greece Host",
+                        enable_recording="cloud",  # Enable recording in token
+                        start_cloud_recording=True,  # Auto-start cloud recording
+                        is_owner=True  # Double ensure owner status
+                    )
+                )
+            )
+            
+            logger.info("Generated new owner token with recording permissions")
+            
+            # Use the new token instead of the provided one
+            token = new_token
+            
+        except Exception as e:
+            logger.error(f"Error setting up room recording: {e}")
+            # Continue with original token if there's an error
+
+    # Use this token with the transport
     transport = DailyTransport(
         room_url,
-        token,
+        token,  # Using the owner token we created
         "bot",
         DailyParams(
             audio_out_enabled=True,
             transcription_enabled=True,
             vad_enabled=True,
             vad_analyzer=SileroVADAnalyzer(),
+            start_cloud_recording=True,  # Belt and suspenders approach
         ),
     )
 
     tts = ElevenLabsTTSService(
         api_key=os.getenv("ELEVENLABS_API_KEY"),
-        voice_id="21m00Tcm4TlvDq8ikWAM",  # Rachel voice - natural, friendly female voice
+        voice_id="pNInz6obpgDQGcFmaJgB",  # Adam voice - professional, authoritative male voice
         model_id="eleven_monolingual_v1",
         optimize_streaming_latency=2,  # Reduce latency
-        stability=0.5,  # Balance between stability and variability
-        similarity_boost=0.75,  # Higher voice clarity and similarity
-        style=0.5,  # Balanced speaking style
+        stability=0.7,  # Increase stability for more consistent delivery
+        similarity_boost=0.7,  # Balanced voice clarity
+        style=0.3,  # More businesslike speaking style
         use_speaker_boost=True  # Enhance voice clarity
     )
 
     llm = OpenAILLMService(
         api_key=os.getenv("OPENAI_API_KEY"),
         model="gpt-4o",
-        temperature=0.95,
-        max_tokens=2048,
-        top_p=0.95,
-        frequency_penalty=0.5,
-        presence_penalty=0.5,
+        temperature=0.7,  # Lower temperature for more focused responses
+        max_tokens=1024,  # Shorter responses
+        top_p=0.9,
+        frequency_penalty=0.3,  # Reduce repetition
+        presence_penalty=0.6,  # Encourage more direct questions
     )
 
     context = OpenAILLMContext()
