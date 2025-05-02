@@ -37,6 +37,7 @@ from pipecat.frames.frames import (
     TTSSpeakFrame,
     LLMMessagesFrame,
     TranscriptionFrame,
+    TextFrame,
 )
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
@@ -56,8 +57,8 @@ from pipecat_flows import FlowManager, FlowConfig
 from deepgram import LiveOptions
 import asyncio
 import json
-from datetime import datetime, timezone
 import google.ai.generativelanguage as glm
+from datetime import datetime, timezone
 
 load_dotenv(override=True)
 
@@ -290,15 +291,18 @@ async def main(room_url: str, token: str, config: dict):
     # context: OpenAILLMContext # Original context type
     context: GoogleLLMContext # Use Google-specific context
 
-    # Define system instruction for Google LLM
-    # system_instruction_content = "Καλωσόρισε ..." # Moved to service initialization
+    # Define initial messages for the context
+    initial_messages = [
+        glm.Content(role="user", parts=[glm.Part(text="Hello")]),
+        glm.Content(role="model", parts=[glm.Part(text="Hi there!")]) # Use 'model' for assistant role in Google context
+    ]
 
     # Initialize empty context; FlowManager will populate it based on the flow.
     # logger.debug("Initializing empty context for Flow Mode.") # Temporarily disabled
-    logger.debug("Initializing empty Google LLM context (no FlowManager) with system instruction.")
-    # context = OpenAILLMContext() # Original instantiation
+    logger.debug("Initializing Google LLM context with initial messages.")
+    # context = GoogleLLMContext() # Previous initialization
     # context = GoogleLLMContext(system_instruction=system_instruction_content) # Removed system_instruction from here
-    context = GoogleLLMContext()
+    context = GoogleLLMContext(messages=initial_messages)
 
     context_aggregator = llm.create_context_aggregator(context)
 
@@ -371,6 +375,25 @@ async def main(room_url: str, token: str, config: dict):
         # Notify the client that the bot is ready
         await rtvi.set_bot_ready()
 
+        # Add placeholder text to UI transcripts
+        try:
+            logger.debug("Adding placeholder transcripts to RTVI.")
+            # Placeholder for user transcript
+            user_placeholder = TranscriptionFrame(
+                "placeholder_user",
+                text="-- Waiting for user --",
+                timestamp=datetime.now(timezone.utc)
+            )
+            await rtvi.process_frame(user_placeholder, FrameDirection.DOWNSTREAM)
+
+            # Placeholder for bot transcript
+            bot_placeholder = TextFrame(text="-- Waiting for bot --")
+            await rtvi.process_frame(bot_placeholder, FrameDirection.DOWNSTREAM)
+
+            logger.debug("Placeholder transcripts sent to RTVI.")
+        except Exception as e:
+            logger.error(f"Error sending placeholder transcripts to RTVI: {e}")
+
     @transport.event_handler("on_first_participant_joined")
     async def on_first_participant_joined(transport, participant):
         # Push a static frame to show the bot is listening
@@ -418,6 +441,7 @@ async def main(room_url: str, token: str, config: dict):
         # Check if it's the specific user text input dictionary structure
         elif isinstance(message, dict) and message.get('type') == 'user-text-input' and 'data' in message and 'text' in message['data']:
             user_text_content = message['data']['text'].strip()
+            
             logger.debug(f"Extracted text '{user_text_content}' from user-text-input message.")
 
         # Check if it's a plain, non-empty string
@@ -428,39 +452,31 @@ async def main(room_url: str, token: str, config: dict):
         # If we extracted valid text content, process it
         if user_text_content:
             try:
-                # Create Google Content object first
-                logger.debug(f"Creating Google Content object for: {user_text_content}")
-                part = glm.Part(text=user_text_content)
-                content = glm.Content(role="user", parts=[part])
+                # 1: Update LLM Context
+                logger.debug(f"Creating Google Content object for LLM: {user_text_content}")
+                llm_part = glm.Part(text=user_text_content)
+                llm_content = glm.Content(role="user", parts=[llm_part])
+                llm_message_frame = LLMMessagesFrame([llm_content])
+                await task.queue_frames([llm_message_frame])
+                logger.debug(f"Queued LLMMessagesFrame for LLM context.")
 
-                # 1: Update LLM context directly via aggregator, passing the Content object
-                logger.debug(f"Pushing Google Content object to context aggregator.")
-                if context_aggregator:
-                    await context_aggregator.push_user_message(content) # Pass the object
-                    logger.debug(f"Pushed Google Content object for '{user_text_content}' to context aggregator.")
-
-                    # 2: Try sending TranscriptionFrame directly to RTVI for UI
-                    if rtvi:
-                        try:
-                            logger.debug(f"Creating TranscriptionFrame for RTVI: {user_text_content}")
-                            rtvi_frame = TranscriptionFrame(
-                                "app_message_user", # user_id (positional)
-                                text=user_text_content,
-                                timestamp=datetime.now(timezone.utc)
-                            )
-                            await rtvi.process_frame(rtvi_frame, FrameDirection.DOWNSTREAM)
-                            logger.debug("Sent TranscriptionFrame directly to rtvi.process_frame.")
-                        except Exception as rtvi_e:
-                            logger.error(f"Error sending TranscriptionFrame directly to RTVI: {rtvi_e}")
-                    else:
-                         logger.warning("RTVI object not found, cannot update UI transcript for typed message.")
+                # 2: Update UI Transcript via RTVI
+                if rtvi:
+                    try:
+                        logger.debug(f"Creating TranscriptionFrame for RTVI UI: {user_text_content}")
+                        ui_frame = TranscriptionFrame(
+                            sender, # user_id (positional)
+                            user_text_content # text (positional)
+                        )
+                        await rtvi.process_frame(ui_frame, FrameDirection.UPSTREAM)
+                        logger.debug("Sent TranscriptionFrame directly to rtvi.process_frame for UI.")
+                    except Exception as rtvi_e:
+                        logger.error(f"Error sending TranscriptionFrame directly to RTVI: {rtvi_e}")
                 else:
-                    logger.error("Context aggregator not found, cannot push user message.")
+                    logger.warning("RTVI object not found, cannot update UI transcript for typed message.")
 
-            except AttributeError:
-                 logger.error("Context aggregator does not have 'push_user_message'. Cannot add typed message to context this way.")
             except NameError:
-                logger.error("Could not queue app message: 'task' or 'context_aggregator' object not found in scope.")
+                logger.error("Could not process app message: 'task' or 'rtvi' object not found in scope.")
             except Exception as e:
                 logger.error(f"Error processing app message: {e}")
 
