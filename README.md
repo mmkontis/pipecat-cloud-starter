@@ -87,13 +87,13 @@ LOCAL_RUN=1 python bot.py
 
 ```bash
 # Build the image (targeting ARM architecture for cloud deployment)
-docker build --platform=linux/arm64 -t my-first-agent:latest .
+docker build --platform=linux/arm64 -t humanlike:latest .
 
 # Tag with your Docker username and version
-docker tag my-first-agent:latest your-username/my-first-agent:0.1
+docker tag humanlike:latest minasmarios/humanlike:0.1
 
 # Push to Docker Hub
-docker push your-username/my-first-agent:0.1
+docker push minasmarios/humanlike:0.1
 ```
 
 ### 2. Create a secret set for your API keys
@@ -109,13 +109,13 @@ cp env.example .env
 # OPENAI_API_KEY=your_openai_key
 
 # Create a secret set from your .env file
-pcc secrets set my-first-agent-secrets --file .env
+pcc secrets set humanlike-secrets --file .env
 ```
 
 Alternatively, you can create secrets directly via CLI:
 
 ```bash
-pcc secrets set my-first-agent-secrets \
+pcc secrets set humanlike \
   CARTESIA_API_KEY=your_cartesia_key \
   OPENAI_API_KEY=your_openai_key
 ```
@@ -123,7 +123,7 @@ pcc secrets set my-first-agent-secrets \
 ### 3. Deploy to Pipecat Cloud
 
 ```bash
-pcc deploy my-first-agent your-username/my-first-agent:0.1 --secrets my-first-agent-secrets
+pcc deploy humanlike minasmarios/humanlike:0.1 --secrets humanlike-secrets
 ```
 
 > **Note (Optional)**: For a more maintainable approach, you can use the included `pcc-deploy.toml` file:
@@ -157,10 +157,10 @@ For more responsive testing, you can scale your deployment to keep a minimum of 
 
 ```bash
 # Ensure at least one warm instance is always available
-pcc deploy my-first-agent your-username/my-first-agent:0.1 --min-instances 1
+pcc deploy humanlike minasmarios/humanlike:0.1 --min-instances 1
 
 # Check the status of your deployment
-pcc agent status my-first-agent
+pcc agent status minasmarios
 ```
 
 By default, idle instances are maintained for 5 minutes before being terminated when using scale-to-zero.
@@ -179,7 +179,7 @@ pcc organizations keys use
 
 ```bash
 # Start a session with your agent in a Daily room
-pcc agent start my-first-agent --use-daily
+pcc agent start humanlike --use-daily
 ```
 
 This will return a URL, which you can use to connect to your running agent.

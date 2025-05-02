@@ -1,0 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+When trying to install, install to .venv with uv and add to reuirements
+When trying to run, alsways activate the virtual envieroment pocketuv
+When wanting to run a bot.py file, run "LOCAL_RUN=1 python *bot file name like bot.py*"

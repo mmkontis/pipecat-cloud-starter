@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+when use askes to deploy, run [deploy.sh](mdc:deploy.sh).
