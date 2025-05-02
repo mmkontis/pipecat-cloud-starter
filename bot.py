@@ -52,7 +52,7 @@ from pipecat.services.openai.stt import OpenAISTTService
 from pipecat.services.deepgram.stt import DeepgramSTTService
 from pipecat.transports.services.daily import DailyParams, DailyTransport
 from pipecatcloud.agent import DailySessionArguments
-from pipecat.services.simli import SimliVideoService, SimliConfig
+from pipecat.services.simli.video import SimliVideoService, SimliConfig
 from pipecat_flows import FlowManager, FlowConfig
 from deepgram import LiveOptions
 import asyncio
